@@ -1,0 +1,184 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class MultiUserRechargeSystem {
+    public static final String ADMIN_PASSWORD = "admin123";
+    public static Map<String, Integer> userBalances = new HashMap<>();
+    public static Map<String, Map<String, Integer>> userDataPlans = new HashMap<>();
+
+    public static Map<String, Integer> dataPlans = new HashMap<>();
+
+    static {
+        dataPlans.put("Small Plan (500MB)", 5);
+        dataPlans.put("Medium Plan (1GB)", 10);
+        dataPlans.put("Large Plan (2GB)", 20);
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Welcome to Multi-User Data Recharge System!");
+
+        while (true) {
+            System.out.println("\n1. User Login");
+            System.out.println("2. Admin Login");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    userLogin(scanner);
+                    break;
+                case 2:
+                    adminLogin(scanner);
+                    break;
+                case 3:
+                    System.out.println("Exiting Data Recharge System. Goodbye!");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    public static void userLogin(Scanner scanner) {
+        System.out.print("Enter your username: ");
+        String username = scanner.next();
+
+        if (!userBalances.containsKey(username)) {
+            // New user registration
+            userBalances.put(username, 0);
+            userDataPlans.put(username, new HashMap<>());
+        }
+
+        userMenu(username, scanner);
+    }
+
+    public static void userMenu(String username, Scanner scanner) {
+        while (true) {
+            System.out.println("\nUser Menu - " + username);
+            System.out.println("1. View Balance");
+            System.out.println("2. Recharge");
+            System.out.println("3. Logout");
+            System.out.print("Choose an option: ");
+
+            int userChoice = scanner.nextInt();
+
+            switch (userChoice) {
+                case 1:
+                    System.out.println("Your balance: $" + userBalances.get(username));
+                    break;
+                case 2:
+                    userRecharge(username, scanner);
+                    break;
+                case 3:
+                    System.out.println("Logging out...");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    public static void userRecharge(String username, Scanner scanner) {
+        System.out.println("\nSelect a data plan:");
+        int planIndex = 1;
+        for (String plan : dataPlans.keySet()) {
+            System.out.println(planIndex + ". " + plan + " - $" + dataPlans.get(plan));
+            planIndex++;
+        }
+
+        System.out.print("Choose a plan: ");
+        int planChoice = scanner.nextInt();
+
+        if (planChoice >= 1 && planChoice <= dataPlans.size()) {
+            String selectedPlan = dataPlans.keySet().toArray()[planChoice - 1].toString();
+            int amount = dataPlans.get(selectedPlan);
+
+            userBalances.put(username, userBalances.get(username) + amount);
+            userDataPlans.get(username).put(selectedPlan, amount);
+
+            System.out.println("Recharge successful! Your new balance is: $" + userBalances.get(username));
+        } else {
+            System.out.println("Invalid plan choice. Recharge canceled.");
+        }
+    }
+
+    public static void adminLogin(Scanner scanner) {
+        System.out.print("\nEnter admin password: ");
+        String passwordAttempt = scanner.next();
+
+        if (passwordAttempt.equals(ADMIN_PASSWORD)) {
+            adminMenu(scanner);
+        } else {
+            System.out.println("Incorrect password. Access denied.");
+        }
+    }
+
+    public static void adminMenu(Scanner scanner) {
+        while (true) {
+            System.out.println("\nAdmin Menu:");
+            System.out.println("1. View User Balances");
+            System.out.println("2. Modify Data Plans");
+            System.out.println("3. Exit Admin Mode");
+            System.out.print("Choose an option: ");
+
+            int adminChoice = scanner.nextInt();
+
+            switch (adminChoice) {
+                case 1:
+                    viewUserBalances();
+                    break;
+                case 2:
+                    modifyDataPlans(scanner);
+                    break;
+                case 3:
+                    System.out.println("Exiting Admin Mode.");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    public static void viewUserBalances() {
+        System.out.println("\nUser Balances:");
+        for (String user : userBalances.keySet()) {
+            System.out.println(user + ": $" + userBalances.get(user));
+        }
+    }
+
+    public static void modifyDataPlans(Scanner scanner) {
+        while (true) {
+            System.out.println("\nData Plans:");
+            int planIndex = 1;
+            for (String plan : dataPlans.keySet()) {
+                System.out.println(planIndex + ". " + plan + " - $" + dataPlans.get(plan));
+                planIndex++;
+            }
+
+            System.out.println("0. Go Back");
+            System.out.print("Choose a plan to modify or enter 0 to go back: ");
+            int planChoice = scanner.nextInt();
+
+            if (planChoice == 0) {
+                return;
+            }
+            if (planChoice >= 1 && planChoice <= dataPlans.size()) {
+                String selectedPlan = dataPlans.keySet().toArray()[planChoice - 1].toString();
+                System.out.print("Enter the new price for '" + selectedPlan + "': $");
+                int newPrice = scanner.nextInt();
+
+                dataPlans.put(selectedPlan, newPrice);
+                System.out.println("Data plan updated successfully.");
+            } 
+            else {
+                System.out.println("Invalid plan choice. Please try again.");
+            }
+        }
+    }
+}
